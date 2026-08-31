@@ -1,66 +1,18 @@
-# Pi-side runtime dependencies for the trash-collecting catamaran robot.
-#
-# Install with:
-#   pip install -r requirements.txt
-# (preferably inside a virtualenv — see the project's README for the
-# recommended venv setup on Raspberry Pi OS).
-#
-# The list below is the strict subset of the upstream YOLOv5
-# repository's requirements.txt (github.com/ultralytics/yolov5) that
-# this project actually exercises at runtime. We deliberately omit
-# the heavier items (matplotlib, seaborn, tensorboard, clearml,
-# comet_ml, coremltools, onnx, openvino, tensorflow*, etc.) because
-# this project's pipeline never imports them — we run inference and
-# ship commands, we don't plot or export.
-#
-# IMPORTANT: do not be tempted to add the `ultralytics` PyPI package
-# only if you "don't need the unified YOLOv8 API." As of the current
-# upstream yolov5 repo, hubconf.py does
-#     from ultralytics.utils.patches import torch_load
-# at module top level, so the unified `ultralytics` package is a
-# HARD dependency for the torch.hub.load('ultralytics/yolov5',
-# 'custom', ...) loading path. The unified package exposes the v8
-# API as a side effect, but we don't use the v8 API here — we only
-# use it because yolov5's own hubconf now imports one symbol from
-# it.
-#
-# `pyserial` is the only dependency that isn't pulled in by the
-# yolov5 repo (it isn't a model-side dep, it's the Pi<->Arduino
-# link). `picamera2` is the Raspberry Pi OS package that wraps
-# libcamera — see the install note below.
-
-# --- Core (matches yolov5's runtime requirements) ---------------------------
-torch>=1.8.0           # see https://pytorch.org/get-started/locally
+torch>=1.8.0   
 torchvision>=0.9.0
 numpy>=1.23.5
-opencv-python>=4.6.0   # required by yolov5's utils; also used by Camera.open()
+opencv-python>=4.6.0 
 Pillow>=10.3.0
 PyYAML>=5.3.1
-requests>=2.32.2       # yolov5 checks-for-update path
+requests>=2.32.2  
 tqdm>=4.66.3
-pandas>=1.1.4          # yolov5 returns Detections as a pandas DataFrame
-psutil                 # yolov5 memory/CPU reporting (harmless to have)
-gitpython>=3.1.30      # yolov5 git hash for telemetry
-thop>=0.1.1            # yolov5 FLOPs computation (only at model load)
-packaging              # yolov5 dependency-check helper
-setuptools>=70.0.0     # yolov5 explicit pin
+pandas>=1.1.4
+psutil 
+gitpython>=3.1.30
+thop>=0.1.1 
+packaging   
+setuptools>=70.0.0 
 
-# --- The yolov5 hubconf pulls one symbol from the unified package ----------
-# Required because hubconf.py does `from ultralytics.utils.patches
-# import torch_load` at top level. We use only the v5 hub path
-# (`torch.hub.load('ultralytics/yolov5', 'custom', path=...)`); the
-# v8-style `from ultralytics import YOLO` API is NOT used here and
-# is available only as a side effect of installing this dependency.
 ultralytics>=8.4.83
 
-# --- Pi-specific (not from yolov5's requirements) --------------------------
-pyserial>=3.5          # Pi <-> Arduino serial link (SerialLink)
-
-# --- picamera2: install via apt, not pip ------------------------------------
-# On Raspberry Pi OS Bookworm and later, picamera2 is NOT a pip
-# package. Install with:
-#     sudo apt install -y python3-picamera2
-# This brings in libcamera and the python bindings. The Camera
-# module imports picamera2 lazily inside Camera.open(), so import
-# of `camera.py` succeeds even on a machine that doesn't have
-# picamera2 installed (useful for unit tests and the dashboard).
+pyserial>=3.5 
